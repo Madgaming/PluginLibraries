@@ -3,6 +3,7 @@ package net.zetaeta.plugins.libraries;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
 
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -42,5 +43,9 @@ public class ZPUtil {
 			sb.append(s).append(" ");
 		}
 		return sb.toString();
+	}
+	
+	public static <T> T[] removeFirstIndex(T[] array) {
+	    return Arrays.copyOfRange(array, 0, array.length);
 	}
 }

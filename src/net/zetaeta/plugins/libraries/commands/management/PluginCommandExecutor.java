@@ -4,6 +4,12 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 
+/**
+ * 
+ * 
+ * @author Zetaeta
+ *
+ */
 public abstract class PluginCommandExecutor implements CommandExecutor {
     
     @Override

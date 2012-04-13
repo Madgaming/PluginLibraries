@@ -2,29 +2,42 @@ package net.zetaeta.plugins.libraries.commands.management;
 
 import java.lang.reflect.Field;
 import java.util.Arrays;
-import java.util.logging.Logger;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import net.zetaeta.plugins.libraries.util.ReflectionUtil;
 
 import org.bukkit.Bukkit;
+import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandMap;
+import org.bukkit.command.SimpleCommandMap;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.SimplePluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
+/**
+ * Manages commands for this library, with facilities for dynamically registering and unregistering commands.
+ * 
+ * @author Zetaeta
+ */
 public class CommandsManager {
     private JavaPlugin plugin;
-    private Logger pluginLogger;
     private CommandMap commandMap;
     
+    /**
+     * @param plugin JavaPlugin for which this instance is managing.
+     */
     public CommandsManager(JavaPlugin plugin) {
-        pluginLogger = plugin.getLogger();
+        this.plugin = plugin;
     }
     
     /**
      * Registers a command to the CommandMap, for use registering commands dynamically after enabling.
      * 
      * @param commandName Main command, without the "/".
-     * @param executor CommandExecutor that will be executing the command. 
+     * @param executor CommandManager that will be executing the command. 
      * If the executor extends PluginCommandExecutor, the class will be checked for methods annotated with {@link net.zetaeta.plugins.libraries.commands.Command @Command}, 
      * and if there is a method with that annotation specifying this command it will be set as executor.
      * @param aliases Command's aliases.
@@ -32,8 +45,10 @@ public class CommandsManager {
      * @param description Description of the command, used by some help plugins.
      * @param permission Permission of the command, if you want the command itself to do permission checking.
      * @param permissionMessage Message to be shown if player does not have the permission. Set to null for the default Bukkit error.
-     * */
-    public boolean registerCommand(String commandName, CommandExecutor executor, String[] aliases, String usage, String description, String permission, String permissionMessage) {
+     * 
+     * @return true if command is successfully registered, false otherwise.
+     */
+    public Command registerCommand(String commandName, CommandExecutor executor, String[] aliases, String usage, String description, String permission, String permissionMessage) {
         DynamicPluginCommand command = new DynamicPluginCommand(commandName, plugin);
         command.setAliases(Arrays.asList(aliases)).setUsage(usage).setDescription(description);
         command.setPermission(permission);
@@ -47,69 +62,246 @@ public class CommandsManager {
                 field.setAccessible(true);
                 commandMap = (CommandMap) field.get(pm);
                 commandMap.register(plugin.getDescription().getName(), command);
+                return command;
             } catch (Exception e) {
                 e.printStackTrace();
-                return false;
+                return null;
             }
         }
-        return false;
+        return null;
     }
     
-    public boolean registerCommand(String commandName, CommandExecutor executor, String[] aliases, String usage, String description, String permission) {
+    /**
+     * Registers a command to the CommandMap, for use registering commands dynamically after enabling.
+     * 
+     * @param commandName Main command, without the "/".
+     * @param executor CommandManager that will be executing the command. 
+     * If the executor extends PluginCommandExecutor, the class will be checked for methods annotated with {@link net.zetaeta.plugins.libraries.commands.Command @Command}, 
+     * and if there is a method with that annotation specifying this command it will be set as executor.
+     * @param aliases Command's aliases.
+     * @param usage Usage message of command.
+     * @param description Description of the command, used by some help plugins.
+     * @param permission Permission of the command, if you want the command itself to do permission checking.
+     * @return true if command is successfully registered, false otherwise.
+     */
+    public Command registerCommand(String commandName, CommandExecutor executor, String[] aliases, String usage, String description, String permission) {
         return registerCommand(commandName, executor, aliases, usage, description, permission, "§cYou do not have access to that command!");
     }
     
-    public boolean registerCommand(String commandName, CommandExecutor executor, String[] aliases, String usage, String description) {
+    /**
+     * Registers a command to the CommandMap, for use registering commands dynamically after enabling.
+     * 
+     * @param commandName Main command, without the "/".
+     * @param executor CommandManager that will be executing the command. 
+     * If the executor extends PluginCommandExecutor, the class will be checked for methods annotated with {@link net.zetaeta.plugins.libraries.commands.Command @Command}, 
+     * and if there is a method with that annotation specifying this command it will be set as executor.
+     * @param aliases Command's aliases.
+     * @param usage Usage message of command.
+     * @param description Description of the command, used by some help plugins.
+     * @return true if command is successfully registered, false otherwise.
+     */
+    public Command registerCommand(String commandName, CommandExecutor executor, String[] aliases, String usage, String description) {
         return registerCommand(commandName, executor, aliases, usage, description, null);
     }
     
-    public boolean registerCommand(String commandName, CommandExecutor executor, String[] aliases, String usage) {
+    /**
+     * Registers a command to the CommandMap, for use registering commands dynamically after enabling.
+     * 
+     * @param commandName Main command, without the "/".
+     * @param executor CommandManager that will be executing the command. 
+     * If the executor extends PluginCommandExecutor, the class will be checked for methods annotated with {@link net.zetaeta.plugins.libraries.commands.Command @Command}, 
+     * and if there is a method with that annotation specifying this command it will be set as executor.
+     * @param aliases Command's aliases.
+     * @param usage Usage message of command.
+     * @return true if command is successfully registered, false otherwise.
+     */
+    public Command registerCommand(String commandName, CommandExecutor executor, String[] aliases, String usage) {
         return registerCommand(commandName, executor, aliases, usage, "");
     }
     
-    public boolean registerCommand(String commandName, CommandExecutor executor, String[] aliases) {
+    /**
+     * Registers a command to the CommandMap, for use registering commands dynamically after enabling.
+     * 
+     * @param commandName Main command, without the "/".
+     * @param executor CommandManager that will be executing the command. 
+     * If the executor extends PluginCommandExecutor, the class will be checked for methods annotated with {@link net.zetaeta.plugins.libraries.commands.Command @Command}, 
+     * and if there is a method with that annotation specifying this command it will be set as executor.
+     * @param aliases Command's aliases.
+     * @return true if command is successfully registered, false otherwise.
+     */
+    public Command registerCommand(String commandName, CommandExecutor executor, String[] aliases) {
         return registerCommand(commandName, executor, aliases, "/<command>");
     }
     
-    public boolean registerCommand(String commandName, CommandExecutor executor, String usage) {
+    /**
+     * Registers a command to the CommandMap, for use registering commands dynamically after enabling.
+     * 
+     * @param commandName Main command, without the "/".
+     * @param executor CommandManager that will be executing the command. 
+     * If the executor extends PluginCommandExecutor, the class will be checked for methods annotated with {@link net.zetaeta.plugins.libraries.commands.Command @Command}, 
+     * and if there is a method with that annotation specifying this command it will be set as executor.
+     * @param usage Usage message of command.
+     * @return true if command is successfully registered, false otherwise.
+     */
+    public Command registerCommand(String commandName, CommandExecutor executor, String usage) {
         return registerCommand(commandName, executor, new String[] {}, usage);
     }
     
-    public boolean registerCommand(String commandName, CommandExecutor executor) {
+    /**
+     * Registers a command to the CommandMap, for use registering commands dynamically after enabling.
+     * 
+     * @param commandName Main command, without the "/".
+     * @param executor CommandManager that will be executing the command. 
+     * If the executor extends PluginCommandExecutor, the class will be checked for methods annotated with {@link net.zetaeta.plugins.libraries.commands.Command @Command}, 
+     * and if there is a method with that annotation specifying this command it will be set as executor.
+     * @return true if command is successfully registered, false otherwise.
+     */
+    public Command registerCommand(String commandName, CommandExecutor executor) {
         return registerCommand(commandName, executor, new String[] {}, "/<command>");
     }
     
     
-    public boolean registerCommand(String commandName, String[] aliases, String usage, String description, String permission, String permissionMessage) {
+    /**
+     * Registers a command to the CommandMap, for use registering commands dynamically after enabling.
+     * 
+     * @param commandName Main command, without the "/".
+     * @param aliases Command's aliases.
+     * @param usage Usage message of command.
+     * @param description Description of the command, used by some help plugins.
+     * @param permission Permission of the command, if you want the command itself to do permission checking.
+     * @param permissionMessage Message to be shown if player does not have the permission. Set to null for the default Bukkit error.
+     * 
+     * @return true if command is successfully registered, false otherwise.
+     */
+    public Command registerCommand(String commandName, String[] aliases, String usage, String description, String permission, String permissionMessage) {
         return registerCommand(commandName, plugin, aliases, usage, description, permission, permissionMessage);
     }
     
-    public boolean registerCommand(String commandName,  String[] aliases, String usage, String description, String permission) {
+    /**
+     * Registers a command to the CommandMap, for use registering commands dynamically after enabling.
+     * 
+     * @param commandName Main command, without the "/".
+     * @param aliases Command's aliases.
+     * @param usage Usage message of command.
+     * @param description Description of the command, used by some help plugins.
+     * @param permission Permission of the command, if you want the command itself to do permission checking.
+     * @return true if command is successfully registered, false otherwise.
+     */
+    public Command registerCommand(String commandName,  String[] aliases, String usage, String description, String permission) {
         return registerCommand(commandName, plugin, aliases, usage, description, permission);
     }
     
-    public boolean registerCommand(String commandName, String[] aliases, String usage, String description) {
+    /**
+     * Registers a command to the CommandMap, for use registering commands dynamically after enabling.
+     * 
+     * @param commandName Main command, without the "/".
+     * @param aliases Command's aliases.
+     * @param usage Usage message of command.
+     * @param description Description of the command, used by some help plugins.
+     * @return true if command is successfully registered, false otherwise.
+     */
+    public Command registerCommand(String commandName, String[] aliases, String usage, String description) {
         return registerCommand(commandName, plugin, aliases, usage, description);
     }
     
-    public boolean registerCommand(String commandName, String[] aliases, String usage) {
+    /**
+     * Registers a command to the CommandMap, for use registering commands dynamically after enabling.
+     * 
+     * @param commandName Main command, without the "/".
+     * @param aliases Command's aliases.
+     * @param usage Usage message of command.
+     * @return true if command is successfully registered, false otherwise.
+     */
+    public Command registerCommand(String commandName, String[] aliases, String usage) {
         return registerCommand(commandName, plugin, aliases, usage);
     }
     
-    public boolean registerCommand(String commandName, String[] aliases) {
+    /**
+     * Registers a command to the CommandMap, for use registering commands dynamically after enabling.
+     * 
+     * @param commandName Main command, without the "/".
+     * @param aliases Command's aliases.
+     * @return true if command is successfully registered, false otherwise.
+     */
+    public Command registerCommand(String commandName, String[] aliases) {
         return registerCommand(commandName, plugin, aliases, "/<command>");
     }
     
-    public boolean registerCommand(String commandName, String usage) {
+    /**
+     * Registers a command to the CommandMap, for use registering commands dynamically after enabling.
+     * 
+     * @param commandName Main command, without the "/".
+     * @param usage Usage message of command.
+     * @return true if command is successfully registered, false otherwise.
+     */
+    public Command registerCommand(String commandName, String usage) {
         return registerCommand(commandName, plugin, new String[] {}, usage);
     }
     
-    public boolean registerCommand(String commandName) {
+    /**
+     * Registers a command to the CommandMap, for use registering commands dynamically after enabling.
+     * 
+     * @param commandName Main command, without the "/".
+     * @return true if command is successfully registered, false otherwise.
+     */
+    public Command registerCommand(String commandName) {
         return registerCommand(commandName, plugin, new String[] {}, "/<command>");
     }
     
-    
+    /**
+     * 
+     * @param commandName Name of the command to unregister.
+     * @return true if command was successfully unregistered, false if an error occurred or the command was not registered.
+     */
     public boolean unregisterCommand(String commandName) {
-        
+        SimpleCommandMap scm = (SimpleCommandMap) commandMap;
+        try {
+            Map<String, Command> knownCommands = ReflectionUtil.getField(scm, "knownCommands");
+            Set<String> aliases = ReflectionUtil.getField(scm, "aliases");
+            Command cmd = knownCommands.get(commandName);
+            if (cmd == null) {
+                return false;
+            }
+            List<String> cmdAliases = cmd.getAliases();
+            for (String al : cmdAliases) {
+                aliases.remove(al);
+                knownCommands.remove(al);
+            }
+            cmd.unregister(scm);
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+    
+    /**
+     * Gets the command with the specific label.
+     * 
+     * @param name Name of the command.
+     * @return Command represented by the name.
+     */
+    public Command getCommand(String name) {
+        return commandMap.getCommand(name);
+    }
+    
+    /**
+     * Gets the command with the specific label.
+     * 
+     * @param name Name of the command
+     * @param includeAliases Whether to include aliases in the search for the command.
+     * @return The command with the specified name (or aliases if includeAliases = true)
+     */
+    public Command getCommand(String name, boolean includeAliases) {
+        Command cmd = commandMap.getCommand(name);
+        if (includeAliases) {
+            return cmd;
+        }
+        else {
+            if (cmd.getLabel().equalsIgnoreCase(name) || cmd.getName().equalsIgnoreCase(name)) {
+                return cmd;
+            }
+            return null;
+        }
     }
 }

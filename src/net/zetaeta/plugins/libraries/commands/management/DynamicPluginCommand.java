@@ -3,6 +3,7 @@ package net.zetaeta.plugins.libraries.commands.management;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.bukkit.command.Command;
@@ -11,6 +12,12 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.Plugin;
 
+/**
+ * Dynamically registered command used by the CommandsManager.
+ * 
+ * @author Zetaeta
+ *
+ */
 public class DynamicPluginCommand extends Command {
 
     private CommandExecutor executor;
@@ -18,6 +25,15 @@ public class DynamicPluginCommand extends Command {
     private Method executorMethod;
     private Plugin ownerPlugin;
     
+    /**
+     * 
+     * @param name Command name.
+     * @param description Command description, useful for help plugins and suchlike.
+     * @param usageMessage Message returned when command fails.
+     * @param aliases Aliases of the command
+     * @param plugin Owner plugin of the command
+     * @param exec CommandExecutor of the command.
+     */
     public DynamicPluginCommand(String name, String description,
             String usageMessage, List<String> aliases, Plugin plugin, CommandExecutor exec) {
         super(name, description, usageMessage, aliases);
@@ -28,14 +44,33 @@ public class DynamicPluginCommand extends Command {
         }
     }
 
+    /**
+     * 
+     * @param name Command name.
+     * @param plugin Owner plugin of the command
+     * @param exec CommandExecutor of the command.
+     */
     public DynamicPluginCommand(String name, Plugin plugin, CommandExecutor exec) {
         this(name, "", "/" + name, new ArrayList<String>(), plugin, exec);
     }
     
+    /**
+     * 
+     * @param name Command name.
+     * @param plugin Owner plugin of the command
+     */
     public DynamicPluginCommand(String name, Plugin plugin) {
         this(name, plugin, plugin);
     }
     
+    /**
+     * 
+     * @param name Command name.
+     * @param description Command description, useful for help plugins and suchlike.
+     * @param usageMessage Message returned when command fails.
+     * @param aliases Aliases of the command
+     * @param plugin Owner plugin of the command
+     */
     public DynamicPluginCommand(String name, String description, String usageMessage, List<String> aliases, Plugin plugin) {
         this(name, description, usageMessage, aliases, plugin, plugin);
     }
@@ -84,12 +119,19 @@ public class DynamicPluginCommand extends Command {
         for (Method m : methods) {
             Annotation[] annots = m.getAnnotations();
             for (Annotation annot : annots) {
-                if (annot.annotationType() == net.zetaeta.plugins.libraries.commands.Command.class) {
-                    if (((net.zetaeta.plugins.libraries.commands.Command) annot).value().equalsIgnoreCase(this.getName())) {
+                if (annot.annotationType() == net.zetaeta.plugins.libraries.commands.management.Command.class) {
+                    net.zetaeta.plugins.libraries.commands.management.Command cmdAnnot = (net.zetaeta.plugins.libraries.commands.management.Command) annot;
+                    if (cmdAnnot.value().equalsIgnoreCase(this.getName())) {
                         if (m.getName().equals("onCommand")) {
                             isAnnotated = false;
                             executorMethod = null;
                             return;
+                        }
+                        if (cmdAnnot.aliases().length > 0) {
+                            this.setAliases(Arrays.asList(cmdAnnot.aliases()));
+                        }
+                        if (!cmdAnnot.description().equals("")) {
+                            description = cmdAnnot.description();
                         }
                         isAnnotated = true;
                         executorMethod = m;

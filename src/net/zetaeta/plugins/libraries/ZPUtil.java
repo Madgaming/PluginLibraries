@@ -46,6 +46,6 @@ public class ZPUtil {
 	}
 	
 	public static <T> T[] removeFirstIndex(T[] array) {
-	    return Arrays.copyOfRange(array, 0, array.length);
+	    return Arrays.copyOfRange(array, 1, array.length);
 	}
 }

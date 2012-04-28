@@ -39,9 +39,28 @@ public class DynamicPluginCommand extends Command {
         super(name, description, usageMessage, aliases);
         executor = exec;
         ownerPlugin = plugin;
-        if (executor instanceof PluginCommandExecutor) {
+        if (executor instanceof DynamicCommandExecutor) {
             registerAnnotatedExecutor();
         }
+    }
+    
+    /**
+     * 
+     * @param name Command name.
+     * @param description Command description, useful for help plugins and suchlike.
+     * @param usageMessage Message returned when command fails.
+     * @param aliases Aliases of the command
+     * @param plugin Owner plugin of the command
+     * @param executor CommandExecutor of the command.
+     * @param executorMethod Method that handles execution of the command.
+     */
+    public DynamicPluginCommand(String name, String description, String usageMessage, 
+            List<String> aliases, Plugin plugin, CommandExecutor executor, Method executorMethod) {
+        super(name, description, usageMessage, aliases);
+        this.executor = executor;
+        ownerPlugin = plugin;
+        isAnnotated = true;
+        this.executorMethod = executorMethod;
     }
 
     /**

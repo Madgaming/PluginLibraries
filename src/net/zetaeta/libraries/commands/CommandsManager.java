@@ -33,6 +33,17 @@ public class CommandsManager {
      */
     public CommandsManager(JavaPlugin plugin) {
         this.plugin = plugin;
+        PluginManager pm = Bukkit.getPluginManager();
+        if (pm instanceof SimplePluginManager) {
+            Class<SimplePluginManager> spmClass = SimplePluginManager.class;
+            try {
+                Field field = spmClass.getField("commandMap");
+                field.setAccessible(true);
+                commandMap = (CommandMap) field.get(pm);
+            } catch (Throwable e) {
+                e.printStackTrace();
+            }
+        }
     }
     
     /**
@@ -40,7 +51,7 @@ public class CommandsManager {
      * 
      * @param commandName Main command, without the "/".
      * @param executor CommandManager that will be executing the command. 
-     * If the executor extends PluginCommandExecutor, the class will be checked for methods annotated with {@link net.zetaeta.libraries.commands.Command @Command}, 
+     * If the executor extends DynamicCommandExecutor, the class will be checked for methods annotated with {@link net.zetaeta.libraries.commands.Command @Command}, 
      * and if there is a method with that annotation specifying this command it will be set as executor.
      * @param aliases Command's aliases.
      * @param usage Usage message of command.
@@ -52,25 +63,30 @@ public class CommandsManager {
      */
     public Command registerCommand(String commandName, CommandExecutor executor, String[] aliases, String usage, String description, String permission, String permissionMessage) {
         DynamicPluginCommand command = new DynamicPluginCommand(commandName, plugin);
-        command.setAliases(Arrays.asList(aliases)).setUsage(usage).setDescription(description);
-        command.setPermission(permission);
-        command.setPermissionMessage(permissionMessage);
-        
-        PluginManager pm = Bukkit.getPluginManager();
-        if (pm instanceof SimplePluginManager) {
-            Class<SimplePluginManager> spmClass = SimplePluginManager.class;
-            try {
-                Field field = spmClass.getField("commandMap");
-                field.setAccessible(true);
-                commandMap = (CommandMap) field.get(pm);
-                commandMap.register(plugin.getDescription().getName(), command);
-                return command;
-            } catch (Exception e) {
-                e.printStackTrace();
-                return null;
-            }
+        if (aliases != null) {
+            command.setAliases(Arrays.asList(aliases));
         }
-        return null;
+        if (usage != null) {
+            command.setUsage(usage);
+        }
+        if (description != null) {
+            command.setDescription(description);
+        }
+        if (permission != null) {
+            command.setPermission(permission);
+        }
+        if (permissionMessage != null) {
+            command.setPermissionMessage(permissionMessage);
+        }
+        
+        Class<SimplePluginManager> spmClass = SimplePluginManager.class;
+        try {
+            commandMap.register(plugin.getDescription().getName(), command);
+            return command;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
     }
     
     /**
@@ -78,7 +94,7 @@ public class CommandsManager {
      * 
      * @param commandName Main command, without the "/".
      * @param executor CommandManager that will be executing the command. 
-     * If the executor extends PluginCommandExecutor, the class will be checked for methods annotated with {@link net.zetaeta.libraries.commands.Command @Command}, 
+     * If the executor extends DynamicCommandExecutor, the class will be checked for methods annotated with {@link net.zetaeta.libraries.commands.Command @Command}, 
      * and if there is a method with that annotation specifying this command it will be set as executor.
      * @param aliases Command's aliases.
      * @param usage Usage message of command.
@@ -95,7 +111,7 @@ public class CommandsManager {
      * 
      * @param commandName Main command, without the "/".
      * @param executor CommandManager that will be executing the command. 
-     * If the executor extends PluginCommandExecutor, the class will be checked for methods annotated with {@link net.zetaeta.libraries.commands.Command @Command}, 
+     * If the executor extends DynamicCommandExecutor, the class will be checked for methods annotated with {@link net.zetaeta.libraries.commands.Command @Command}, 
      * and if there is a method with that annotation specifying this command it will be set as executor.
      * @param aliases Command's aliases.
      * @param usage Usage message of command.
@@ -111,7 +127,7 @@ public class CommandsManager {
      * 
      * @param commandName Main command, without the "/".
      * @param executor CommandManager that will be executing the command. 
-     * If the executor extends PluginCommandExecutor, the class will be checked for methods annotated with {@link net.zetaeta.libraries.commands.Command @Command}, 
+     * If the executor extends DynamicCommandExecutor, the class will be checked for methods annotated with {@link net.zetaeta.libraries.commands.Command @Command}, 
      * and if there is a method with that annotation specifying this command it will be set as executor.
      * @param aliases Command's aliases.
      * @param usage Usage message of command.
@@ -126,7 +142,7 @@ public class CommandsManager {
      * 
      * @param commandName Main command, without the "/".
      * @param executor CommandManager that will be executing the command. 
-     * If the executor extends PluginCommandExecutor, the class will be checked for methods annotated with {@link net.zetaeta.libraries.commands.Command @Command}, 
+     * If the executor extends DynamicCommandExecutor, the class will be checked for methods annotated with {@link net.zetaeta.libraries.commands.Command @Command}, 
      * and if there is a method with that annotation specifying this command it will be set as executor.
      * @param aliases Command's aliases.
      * @return true if command is successfully registered, false otherwise.
@@ -140,7 +156,7 @@ public class CommandsManager {
      * 
      * @param commandName Main command, without the "/".
      * @param executor CommandManager that will be executing the command. 
-     * If the executor extends PluginCommandExecutor, the class will be checked for methods annotated with {@link net.zetaeta.libraries.commands.Command @Command}, 
+     * If the executor extends DynamicCommandExecutor, the class will be checked for methods annotated with {@link net.zetaeta.libraries.commands.Command @Command}, 
      * and if there is a method with that annotation specifying this command it will be set as executor.
      * @param usage Usage message of command.
      * @return true if command is successfully registered, false otherwise.
@@ -154,7 +170,7 @@ public class CommandsManager {
      * 
      * @param commandName Main command, without the "/".
      * @param executor CommandManager that will be executing the command. 
-     * If the executor extends PluginCommandExecutor, the class will be checked for methods annotated with {@link net.zetaeta.libraries.commands.Command @Command}, 
+     * If the executor extends DynamicCommandExecutor, the class will be checked for methods annotated with {@link net.zetaeta.libraries.commands.Command @Command}, 
      * and if there is a method with that annotation specifying this command it will be set as executor.
      * @return true if command is successfully registered, false otherwise.
      */
@@ -250,8 +266,14 @@ public class CommandsManager {
         return registerCommand(commandName, plugin, new String[] {}, "/<command>");
     }
     
-    public List<Command> registerCommands(PluginCommandExecutor executor) {
-        Class<? extends PluginCommandExecutor> clazz = executor.getClass();
+    /**
+     * Registers all the ({@link net.zetaeta.libraries.commands.Command @Command}-annotated commands in the given CommandExecutor.
+     * 
+     * @param executor CommandExecutor to register Commands in.
+     * @return List of command registered.
+     */
+    public List<Command> registerCommands(DynamicCommandExecutor executor) {
+        Class<? extends DynamicCommandExecutor> clazz = executor.getClass();
         
         Method[] methods = clazz.getMethods();
         
@@ -268,6 +290,7 @@ public class CommandsManager {
                 String permMessage = cmdAnnot.permissionMessage();
                 try {
                     Command cmd = registerCommand(name, executor, aliases, usage, description, perm, permMessage);
+                    commandMap.register(plugin.getName(), cmd);
                     registered.add(cmd);
                 } catch (Throwable e) {
                     plugin.getLogger().severe("Could not register command " + name + "!");

@@ -10,7 +10,7 @@ import org.bukkit.command.CommandSender;
  * @author Zetaeta
  *
  */
-public abstract class PluginCommandExecutor implements CommandExecutor {
+public abstract class DynamicCommandExecutor implements CommandExecutor {
     
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args ) {

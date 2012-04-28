@@ -1,95 +1,65 @@
 package net.zetaeta.libraries.commands.local;
 
-import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
+import org.bukkit.command.CommandSender;
+
 /**
- * A class providing command management within a plugin based on the
- * Settlement model. 
- * 
  * @author Zetaeta
+ *
  */
-public class LocalCommandExecutor {
-    protected Map<String, LocalCommandExecutor> subCommands;
-    protected String[] usage;
-    protected Set<String> aliases;
-    protected LocalPermission permission;
-    protected LocalCommandExecutor parent;
-    
-    
+public interface LocalCommandExecutor {
+
     /**
      * Gets the parent LocalCommandExecutor in the command tree.
-     * 
+     *
      * @return parent LocalCommandExecutor
      */
-    public LocalCommandExecutor getParent() {
-        return parent;
-    }
-    
-    
+    public LocalCommandExecutor getParent();
+
     /**
      * Gets the registered subcommands' executors
-     * 
+     *
      * @return Set of LocalCommandExecutors registered as subcommands.
      */
-    public Set<LocalCommandExecutor> getSubCommands() {
-        return new HashSet<LocalCommandExecutor>(subCommands.values());
-    }
-    
-    
+    public Set<LocalCommandExecutor> getSubCommands();
+
     /**
      * Gets the LocalPermission for this command.
-     * 
+     *
      * @return LocalPermission required for this command.
      */
-    public LocalPermission getPermission() {
-        return permission;
-    }
-    
-    
+    public LocalPermission getPermission();
+
     /**
      * Gets the usage list for the command, used for improperly formed command or {@literal /settlement help <command>}
-     * 
+     *
      * @return Command's usage info, in String[] form ready for {@link org.bukkit.command.CommandSender#sendMessage(String[]) sendMessage()}.
      */
-    public String[] getUsage() {
-        return usage;
-    }
-    
-    
+    public String[] getUsage();
+
     /**
      * Gets different possible aliases for the subcommand.
-     * 
+     *
      * @return Aliases of the command.
      */
-    public Set<String> getAliases() {
-        return aliases;
-    }
-    
-    
+    public Set<String> getAliases();
+
     /**
      * Used to register a subcommand executor to this command.
-     * Even if a command should not have any subcommands, it should still be properly implemented for future convenience or to make extensions easier.
-     * 
+     * Even if a command should not have any subcommands, it should still be properly implemented
+     * for future convenience and to make extensions easier.
+     *
      * @param subCommandExecutor Subcommand to be registered.
      */
-    public void registerSubCommand(LocalCommandExecutor subCommandExecutor) {
-        Set<String> subAliases = subCommandExecutor.aliases;
-        for (String alias : subAliases) {
-            registerSubCommand(alias, subCommandExecutor);
-        }
-    }
-    
+    public void registerSubCommand(LocalCommandExecutor subCommandExecutor);
     
     /**
-     * Used to register a subcommand executor to this command.
-     * Even if a command should not have any subcommands, it should still be properly implemented for future convenience or to make extensions easier.
+     * Executes the subcommand.
      * 
-     * @param subCommand Subcommand alias to register.
-     * @param executor LocalCommandExecutor to register for to be registered.
+     * @param sender Sender of subcommand
+     * @param command Subcommand sent.
+     * @return Whether subcommand executed successfully.
      */
-    public void registerSubCommand(String subCommand, LocalCommandExecutor executor) {
-        subCommands.put(subCommand, executor);
-    }
+    public boolean execute(CommandSender sender, String commandName, String[] args);
 }

@@ -1,5 +1,6 @@
 package net.zetaeta.libraries.commands.local;
 
+import java.util.Collection;
 import java.util.Set;
 
 import org.bukkit.command.CommandSender;
@@ -22,7 +23,12 @@ public interface LocalCommandExecutor {
      *
      * @return Set of LocalCommandExecutors registered as subcommands.
      */
-    public Set<LocalCommandExecutor> getSubCommands();
+    public Collection<LocalCommandExecutor> getSubCommands();
+    
+    /**
+     * @return aliases of all registered subcommands.
+     */
+    public Set<String> getSubCommandAliases();
 
     /**
      * Gets the LocalPermission for this command.
@@ -43,7 +49,7 @@ public interface LocalCommandExecutor {
      *
      * @return Aliases of the command.
      */
-    public Set<String> getAliases();
+    public String[] getAliases();
 
     /**
      * Used to register a subcommand executor to this command.
@@ -58,8 +64,9 @@ public interface LocalCommandExecutor {
      * Executes the subcommand.
      * 
      * @param sender Sender of subcommand
-     * @param command Subcommand sent.
+     * @param alias of the command used.
+     * @param args Arguments to the command.
      * @return Whether subcommand executed successfully.
      */
-    public boolean execute(CommandSender sender, String commandName, String[] args);
+    public boolean execute(CommandSender sender, String alias, String[] args);
 }

@@ -7,39 +7,27 @@ package net.zetaeta.libraries.commands.local;
  * @author Zetaeta
  *
  */
-public class LocalPermission {
-    
-    protected String subPermission;
-    protected LocalPermission parent;
+public interface LocalPermission {
     
     
-    public LocalPermission(String permission, LocalPermission parent) {
-        subPermission = permission;
-        this.parent = parent;
-    }
+    /**
+     * @return The overall permission String represented by this LocalPermission
+     */
+    public String getPermission();
     
+    /**
+     * @return The specific subpermission for this LocalPermission.
+     */
+    public String getSubPermission();
     
-    public String getPermission() {
-        return new StringBuilder().append(parent.getPermission()).append(".").append(subPermission).toString();
-    }
+    /**
+     * @return Whether this is the master local permission.
+     */
+    public boolean isMasterPermission();
     
-    
-    public String getParentPermission() {
-        return parent.getPermission();
-    }
-    
-    
-    public String getSubPermission() {
-        return subPermission;
-    }
-    
-    public boolean isMasterPermission() {
-        return false;
-    }
-    
-    
-    public LocalPermission getParent() {
-        return parent;
-    }
+    /**
+     * @return This LocalPermission's parent LocalPermission.
+     */
+    public LocalPermission getParent();
     
 }

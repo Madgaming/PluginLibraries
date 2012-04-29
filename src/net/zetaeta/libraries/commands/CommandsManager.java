@@ -37,7 +37,7 @@ public class CommandsManager {
         if (pm instanceof SimplePluginManager) {
             Class<SimplePluginManager> spmClass = SimplePluginManager.class;
             try {
-                Field field = spmClass.getField("commandMap");
+                Field field = spmClass.getDeclaredField("commandMap");
                 field.setAccessible(true);
                 commandMap = (CommandMap) field.get(pm);
             } catch (Throwable e) {
@@ -58,11 +58,34 @@ public class CommandsManager {
      * @param description Description of the command, used by some help plugins.
      * @param permission Permission of the command, if you want the command itself to do permission checking.
      * @param permissionMessage Message to be shown if player does not have the permission. Set to null for the default Bukkit error.
+     * @param executorMethod Method that will execute this command.
      * 
-     * @return true if command is successfully registered, false otherwise.
+     * @return Command instance created by the manager.
      */
-    public Command registerCommand(String commandName, CommandExecutor executor, String[] aliases, String usage, String description, String permission, String permissionMessage) {
-        DynamicPluginCommand command = new DynamicPluginCommand(commandName, plugin);
+    public DynamicPluginCommand registerCommand(String commandName, CommandExecutor executor, String[] aliases, String usage, String description, String permission, String permissionMessage, Method executorMethod) {
+        DynamicPluginCommand cmd = registerCommand(commandName, executor, aliases, usage, description, permission, permissionMessage);
+        cmd.setExecutorMethod(executorMethod);
+        return cmd;
+    }
+
+    
+    /**
+     * Registers a command to the CommandMap, for use registering commands dynamically after enabling.
+     * 
+     * @param commandName Main command, without the "/".
+     * @param executor CommandManager that will be executing the command. 
+     * If the executor extends DynamicCommandExecutor, the class will be checked for methods annotated with {@link net.zetaeta.libraries.commands.Command @Command}, 
+     * and if there is a method with that annotation specifying this command it will be set as executor.
+     * @param aliases Command's aliases.
+     * @param usage Usage message of command.
+     * @param description Description of the command, used by some help plugins.
+     * @param permission Permission of the command, if you want the command itself to do permission checking.
+     * @param permissionMessage Message to be shown if player does not have the permission. Set to null for the default Bukkit error.
+     * 
+     * @return Command instance created by the manager.
+     */
+    public DynamicPluginCommand registerCommand(String commandName, CommandExecutor executor, String[] aliases, String usage, String description, String permission, String permissionMessage) {
+        DynamicPluginCommand command = new DynamicPluginCommand(commandName, plugin, executor);
         if (aliases != null) {
             command.setAliases(Arrays.asList(aliases));
         }
@@ -79,7 +102,6 @@ public class CommandsManager {
             command.setPermissionMessage(permissionMessage);
         }
         
-        Class<SimplePluginManager> spmClass = SimplePluginManager.class;
         try {
             commandMap.register(plugin.getDescription().getName(), command);
             return command;
@@ -100,7 +122,7 @@ public class CommandsManager {
      * @param usage Usage message of command.
      * @param description Description of the command, used by some help plugins.
      * @param permission Permission of the command, if you want the command itself to do permission checking.
-     * @return true if command is successfully registered, false otherwise.
+     * @return Command instance created by the manager.
      */
     public Command registerCommand(String commandName, CommandExecutor executor, String[] aliases, String usage, String description, String permission) {
         return registerCommand(commandName, executor, aliases, usage, description, permission, "§cYou do not have access to that command!");
@@ -116,7 +138,7 @@ public class CommandsManager {
      * @param aliases Command's aliases.
      * @param usage Usage message of command.
      * @param description Description of the command, used by some help plugins.
-     * @return true if command is successfully registered, false otherwise.
+     * @return Command instance created by the manager.
      */
     public Command registerCommand(String commandName, CommandExecutor executor, String[] aliases, String usage, String description) {
         return registerCommand(commandName, executor, aliases, usage, description, null);
@@ -131,7 +153,7 @@ public class CommandsManager {
      * and if there is a method with that annotation specifying this command it will be set as executor.
      * @param aliases Command's aliases.
      * @param usage Usage message of command.
-     * @return true if command is successfully registered, false otherwise.
+     * @return Command instance created by the manager.
      */
     public Command registerCommand(String commandName, CommandExecutor executor, String[] aliases, String usage) {
         return registerCommand(commandName, executor, aliases, usage, "");
@@ -145,7 +167,7 @@ public class CommandsManager {
      * If the executor extends DynamicCommandExecutor, the class will be checked for methods annotated with {@link net.zetaeta.libraries.commands.Command @Command}, 
      * and if there is a method with that annotation specifying this command it will be set as executor.
      * @param aliases Command's aliases.
-     * @return true if command is successfully registered, false otherwise.
+     * @return Command instance created by the manager.
      */
     public Command registerCommand(String commandName, CommandExecutor executor, String[] aliases) {
         return registerCommand(commandName, executor, aliases, "/<command>");
@@ -159,7 +181,7 @@ public class CommandsManager {
      * If the executor extends DynamicCommandExecutor, the class will be checked for methods annotated with {@link net.zetaeta.libraries.commands.Command @Command}, 
      * and if there is a method with that annotation specifying this command it will be set as executor.
      * @param usage Usage message of command.
-     * @return true if command is successfully registered, false otherwise.
+     * @return Command instance created by the manager.
      */
     public Command registerCommand(String commandName, CommandExecutor executor, String usage) {
         return registerCommand(commandName, executor, new String[] {}, usage);
@@ -172,7 +194,7 @@ public class CommandsManager {
      * @param executor CommandManager that will be executing the command. 
      * If the executor extends DynamicCommandExecutor, the class will be checked for methods annotated with {@link net.zetaeta.libraries.commands.Command @Command}, 
      * and if there is a method with that annotation specifying this command it will be set as executor.
-     * @return true if command is successfully registered, false otherwise.
+     * @return Command instance created by the manager.
      */
     public Command registerCommand(String commandName, CommandExecutor executor) {
         return registerCommand(commandName, executor, new String[] {}, "/<command>");
@@ -189,7 +211,7 @@ public class CommandsManager {
      * @param permission Permission of the command, if you want the command itself to do permission checking.
      * @param permissionMessage Message to be shown if player does not have the permission. Set to null for the default Bukkit error.
      * 
-     * @return true if command is successfully registered, false otherwise.
+     * @return Command instance created by the manager.
      */
     public Command registerCommand(String commandName, String[] aliases, String usage, String description, String permission, String permissionMessage) {
         return registerCommand(commandName, plugin, aliases, usage, description, permission, permissionMessage);
@@ -203,7 +225,7 @@ public class CommandsManager {
      * @param usage Usage message of command.
      * @param description Description of the command, used by some help plugins.
      * @param permission Permission of the command, if you want the command itself to do permission checking.
-     * @return true if command is successfully registered, false otherwise.
+     * @return Command instance created by the manager.
      */
     public Command registerCommand(String commandName,  String[] aliases, String usage, String description, String permission) {
         return registerCommand(commandName, plugin, aliases, usage, description, permission);
@@ -216,7 +238,7 @@ public class CommandsManager {
      * @param aliases Command's aliases.
      * @param usage Usage message of command.
      * @param description Description of the command, used by some help plugins.
-     * @return true if command is successfully registered, false otherwise.
+     * @return Command instance created by the manager.
      */
     public Command registerCommand(String commandName, String[] aliases, String usage, String description) {
         return registerCommand(commandName, plugin, aliases, usage, description);
@@ -228,7 +250,7 @@ public class CommandsManager {
      * @param commandName Main command, without the "/".
      * @param aliases Command's aliases.
      * @param usage Usage message of command.
-     * @return true if command is successfully registered, false otherwise.
+     * @return Command instance created by the manager.
      */
     public Command registerCommand(String commandName, String[] aliases, String usage) {
         return registerCommand(commandName, plugin, aliases, usage);
@@ -239,7 +261,7 @@ public class CommandsManager {
      * 
      * @param commandName Main command, without the "/".
      * @param aliases Command's aliases.
-     * @return true if command is successfully registered, false otherwise.
+     * @return Command instance created by the manager.
      */
     public Command registerCommand(String commandName, String[] aliases) {
         return registerCommand(commandName, plugin, aliases, "/<command>");
@@ -250,7 +272,7 @@ public class CommandsManager {
      * 
      * @param commandName Main command, without the "/".
      * @param usage Usage message of command.
-     * @return true if command is successfully registered, false otherwise.
+     * @return Command instance created by the manager.
      */
     public Command registerCommand(String commandName, String usage) {
         return registerCommand(commandName, plugin, new String[] {}, usage);
@@ -260,7 +282,7 @@ public class CommandsManager {
      * Registers a command to the CommandMap, for use registering commands dynamically after enabling.
      * 
      * @param commandName Main command, without the "/".
-     * @return true if command is successfully registered, false otherwise.
+     * @return Command instance created by the manager.
      */
     public Command registerCommand(String commandName) {
         return registerCommand(commandName, plugin, new String[] {}, "/<command>");
@@ -289,7 +311,7 @@ public class CommandsManager {
                 String perm = cmdAnnot.permission();
                 String permMessage = cmdAnnot.permissionMessage();
                 try {
-                    Command cmd = registerCommand(name, executor, aliases, usage, description, perm, permMessage);
+                    Command cmd = registerCommand(name, executor, aliases, usage, description, perm, permMessage, m);
                     commandMap.register(plugin.getName(), cmd);
                     registered.add(cmd);
                 } catch (Throwable e) {

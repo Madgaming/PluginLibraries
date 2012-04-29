@@ -26,7 +26,7 @@ public class ZPUtil {
      * @param permission String permission to test
      * @return Whether sender has permission
      */
-    public static boolean checkPermission(CommandSender sender, String permission) {
+    public static final boolean checkPermission(CommandSender sender, String permission) {
         if(sender.hasPermission(permission)) return true;
         sender.sendMessage("§cYou do not have access to that command!");
         return false;
@@ -39,7 +39,7 @@ public class ZPUtil {
      * @param string String to colourise
      * @return Colourised string.
      */
-    public static String addBasicColour(String string) {
+    public static final String addBasicColour(String string) {
         string = string.replaceAll("(§([a-fA-F0-9]))", "§$2");
 
         string = string.replaceAll("(&([a-fA-F0-9]))", "§$2");
@@ -48,7 +48,7 @@ public class ZPUtil {
       }
     
     @SuppressWarnings("javadoc")
-    public static FileConfiguration getFileConfiguration(JavaPlugin plugin, String filename, boolean load) throws IOException {
+    public static final FileConfiguration getFileConfiguration(JavaPlugin plugin, String filename, boolean load) throws IOException {
         File file = new File(plugin.getDataFolder(), filename);
         file.createNewFile();
         FileConfiguration newcfg = YamlConfiguration.loadConfiguration(file);
@@ -67,7 +67,7 @@ public class ZPUtil {
      * @param array Array of Strings to be concatenated
      * @return Single String representing the array
      */
-    public static String arrayAsString(String[] array) {
+    public static final String arrayAsString(String[] array) {
         StringBuilder sb = new StringBuilder();
         for (String s : array) {
             sb.append(s).append(" ");
@@ -82,7 +82,38 @@ public class ZPUtil {
      * @param array Array of <T> to be modified
      * @return array without the first index.
      */
-    public static <T> T[] removeFirstIndex(T[] array) {
+    public static final <T> T[] removeFirstIndex(T[] array) {
+        if (array.length == 0) {
+            return array;
+        }
         return Arrays.copyOfRange(array, 1, array.length);
+    }
+    
+    /**
+     * Concatenates multiple objects into a String using StringBuilder and String.valueOf(Object)
+     * 
+     * @param args Objects to concat
+     * @return String value of Objects concatenated.
+     */
+    public static final String concatString(Object... args) {
+        StringBuilder sb = new StringBuilder();
+        for (Object o : args) {
+            sb.append(String.valueOf(o));
+        }
+        return sb.toString();
+    }
+    
+    /**
+     * Concatenates multiple Strings into a single String using StringBuilder
+     * 
+     * @param args Strings to concat
+     * @return String value of args concatenated.
+     */
+    public static final String concatString(String... args) {
+        StringBuilder sb = new StringBuilder();
+        for (String s : args) {
+            sb.append(s);
+        }
+        return sb.toString();
     }
 }

@@ -93,11 +93,26 @@ public class DynamicPluginCommand extends Command {
     public DynamicPluginCommand(String name, String description, String usageMessage, List<String> aliases, Plugin plugin) {
         this(name, description, usageMessage, aliases, plugin, plugin);
     }
+    
+    /**
+     * Sets the executor method for this command, set to null to disable annotated methoding.
+     * 
+     * @param method
+     */
+    public void setExecutorMethod(Method method) {
+        if (method == null) {
+            executorMethod = null;
+            isAnnotated = false;
+        }
+        else {
+            executorMethod = method;
+            isAnnotated = true;
+        }
+    }
 
     
     @Override
     public boolean execute(CommandSender sender, String commandLabel, String[] args) {
-        
         if (!ownerPlugin.isEnabled()) {
             return false;
         }

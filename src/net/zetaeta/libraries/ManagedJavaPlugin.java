@@ -8,7 +8,8 @@ import org.bukkit.plugin.java.JavaPlugin;
 /**
  * @author Zetaeta
  * 
- * A JavaPlugin with some predefined utility methods, useful (but not required) for using a CommandsManager.
+ * A JavaPlugin with some predefined utility methods, useful (but not required) for using a CommandsManager.4
+ * Not particularly useful now, may add more stuff in future.
  *
  */
 public abstract class ManagedJavaPlugin extends JavaPlugin {

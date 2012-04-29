@@ -1,7 +1,7 @@
 package net.zetaeta.libraries.commands.local;
 
+import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -16,13 +16,26 @@ import org.bukkit.command.CommandSender;
 public abstract class AbstractLocalCommandExecutor implements LocalCommandExecutor {
     protected Map<String, LocalCommandExecutor> subCommands;
     protected String[] usage;
-    protected Set<String> aliases;
+    protected String[] aliases;
     protected LocalPermission permission;
     protected LocalCommandExecutor parent;
     
+    /**
+     * Creates an empty {@link AbstractLocalCommandExecutor},only initialising the subCommands Map and aliases Set.
+     */
     public AbstractLocalCommandExecutor() {
         subCommands = new HashMap<String, LocalCommandExecutor>();
-        aliases = new HashSet<String>();
+        aliases = new String[0];
+    }
+    
+    /**
+     * Creates a bare AbstractLocalCommandExecutor with specified parent.
+     * 
+     * @param parent Parent LocalCommandExecutor for this command.
+     */
+    public AbstractLocalCommandExecutor(LocalCommandExecutor parent) {
+        this();
+        this.parent = parent;
     }
     
     /**
@@ -33,7 +46,7 @@ public abstract class AbstractLocalCommandExecutor implements LocalCommandExecut
      * @param usage Usage message when the command fails.
      * @param aliases Aliases of the command.
      */
-    public AbstractLocalCommandExecutor(LocalCommandExecutor parent, LocalPermission permission, String[] usage, Set<String> aliases) {
+    public AbstractLocalCommandExecutor(LocalCommandExecutor parent, LocalPermission permission, String[] usage, String[] aliases) {
         this.usage = usage;
         this.parent = parent;
         this.permission = permission;
@@ -52,8 +65,15 @@ public abstract class AbstractLocalCommandExecutor implements LocalCommandExecut
     /**
      * {@inheritDoc}
      */
-    public Set<LocalCommandExecutor> getSubCommands() {
-        return new HashSet<LocalCommandExecutor>(subCommands.values());
+    public Collection<LocalCommandExecutor> getSubCommands() {
+        return subCommands.values();
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    public Set<String> getSubCommandAliases() {
+        return subCommands.keySet();
     }
     
     
@@ -76,7 +96,7 @@ public abstract class AbstractLocalCommandExecutor implements LocalCommandExecut
     /**
      * {@inheritDoc}
      */
-    public Set<String> getAliases() {
+    public String[] getAliases() {
         return aliases;
     }
     
@@ -85,7 +105,7 @@ public abstract class AbstractLocalCommandExecutor implements LocalCommandExecut
      * {@inheritDoc}
      */
     public void registerSubCommand(LocalCommandExecutor subCommandExecutor) {
-        Set<String> subAliases = subCommandExecutor.getAliases();
+        String[] subAliases = subCommandExecutor.getAliases();
         for (String alias : subAliases) {
             registerSubCommand(alias, subCommandExecutor);
         }

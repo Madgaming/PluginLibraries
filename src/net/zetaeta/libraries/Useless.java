@@ -20,5 +20,5 @@ public @interface Useless {
     /**
      * Reason for or comment on uselessness.
      */
-    public String value();
+    public String value() default "";
 }

@@ -7,6 +7,7 @@ package net.zetaeta.libraries.commands.local;
  * @author Zetaeta
  *
  */
+@Deprecated
 public interface LocalPermission {
     
     

@@ -1,13 +1,19 @@
 package net.zetaeta.libraries;
 
+import static org.bukkit.Bukkit.getPluginManager;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+import java.util.ListIterator;
 
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.permissions.Permission;
 import org.bukkit.plugin.java.JavaPlugin;
 
 /**
@@ -27,12 +33,64 @@ public abstract class ZPUtil {
      * @param permission String permission to test
      * @return Whether sender has permission
      */
-    public static final boolean checkPermission(CommandSender sender, String permission) {
+    public static boolean checkPermission(CommandSender sender, String permission) {
         if(sender.hasPermission(permission)) return true;
         sender.sendMessage("§cYou do not have access to that command!");
         return false;
     }
     
+
+    public static boolean checkPermission(CommandSender sender, String permission, boolean warn, boolean recursive) {
+        boolean hasPerm;
+        if (recursive) {
+            hasPerm = checkPermissionRecursive(sender, permission);
+        }
+        else {
+            hasPerm = sender.hasPermission(permission);
+        }
+        if (!hasPerm && warn) {
+            sender.sendMessage("§cYou do not have access to that command!");
+        }
+        return hasPerm;
+    }
+    
+    public static boolean checkPermissionRecursive(CommandSender sender, String permission) {
+        String[] nodes = permission.split("\\.");
+        if (nodes.length == 0) {
+            return sender.hasPermission(permission);
+        }
+        if (getPluginManager().getPermission(permission) != null) {
+            return sender.hasPermission(permission);
+        }
+        StringBuilder nodesIt = new StringBuilder(permission);
+        String permIt = permission;
+        List<String> toRegister = new ArrayList<String>(nodes.length);
+        toRegister.add(permission);
+        for (int i=nodes.length - 1, length = permission.length(); i > 0 && !sender.isPermissionSet(permIt); --i) {
+            nodesIt.delete(length - nodes[i].length(), length);
+            length -= nodes[i].length();
+            if (nodesIt.charAt(nodesIt.length() - 1) == '.') {
+                nodesIt.deleteCharAt(nodesIt.length() - 1);
+                --length;
+            }
+            permIt = nodesIt.toString().concat(".*");
+            toRegister.add(permIt);
+        }
+        if (getPluginManager().getPermission(permIt) == null) {
+            getPluginManager().addPermission(new Permission(permIt));
+        }
+        Permission parent = getPluginManager().getPermission(permIt), current = parent, previous = current;
+        {
+            for (ListIterator<String> registerIt = toRegister.listIterator(toRegister.size() - 1); registerIt.hasPrevious();) {
+                String permStr = registerIt.previous();
+                current = new Permission(permStr);
+                current.addParent(previous, true);
+                previous = current;
+                getPluginManager().addPermission(current);
+            }
+        }
+        return sender.hasPermission(permission);
+    }
     
     /**
      * Adds the basic colours (0 - f) to a String by replacing "&<colour digit>" with §<colour digit>
@@ -40,7 +98,7 @@ public abstract class ZPUtil {
      * @param string String to colourise
      * @return Colourised string.
      */
-    public static final String addBasicColour(String string) {
+    public static String addBasicColour(String string) {
         string = string.replaceAll("(§([a-fA-F0-9]))", "§$2");
 
         string = string.replaceAll("(&([a-fA-F0-9]))", "§$2");
@@ -49,7 +107,7 @@ public abstract class ZPUtil {
       }
     
     @SuppressWarnings("javadoc")
-    public static final FileConfiguration getFileConfiguration(JavaPlugin plugin, String filename, boolean load) throws IOException {
+    public static FileConfiguration getFileConfiguration(JavaPlugin plugin, String filename, boolean load) throws IOException {
         File file = new File(plugin.getDataFolder(), filename);
         file.createNewFile();
         FileConfiguration newcfg = YamlConfiguration.loadConfiguration(file);
@@ -68,7 +126,7 @@ public abstract class ZPUtil {
      * @param array Array of Strings to be concatenated
      * @return Single String representing the array
      */
-    public static final String arrayAsString(String[] array) {
+    public static String arrayAsString(String[] array) {
         if (array.length == 0) {
             return "";
         }
@@ -87,7 +145,7 @@ public abstract class ZPUtil {
      * @param array Array of Strings to be concatenated
      * @return Single String representing the array
      */
-    public static final String arrayAsCommaString(String[] array) {
+    public static String arrayAsCommaString(String[] array) {
         if (array.length == 0) {
             return "";
         }
@@ -106,7 +164,7 @@ public abstract class ZPUtil {
      * @param array Array of <T> to be modified
      * @return array without the first index.
      */
-    public static final <T> T[] removeFirstIndex(T[] array) {
+    public static <T> T[] removeFirstIndex(T[] array) {
         if (array.length == 0) {
             return array;
         }
@@ -119,7 +177,7 @@ public abstract class ZPUtil {
      * @param args Objects to concat
      * @return String value of Objects concatenated.
      */
-    public static final String concatString(Object... args) {
+    public static String concatString(Object... args) {
         if (args.length == 0)
             return "";
         StringBuilder sb = new StringBuilder(String.valueOf(args[0]));
@@ -136,7 +194,7 @@ public abstract class ZPUtil {
      * @param bufferLength Amount of prereserved space in the StringBuilder.
      * @return String value of Objects concatenated.
      */
-    public static final String concatString(int bufferLength, Object... args) {
+    public static String concatString(int bufferLength, Object... args) {
         if (args.length == 0)
             return "";
         StringBuilder sb = new StringBuilder(bufferLength);
@@ -152,7 +210,7 @@ public abstract class ZPUtil {
      * @param args Strings to concat
      * @return String value of args concatenated.
      */
-    public static final String concatString(String... args) {
+    public static String concatString(String... args) {
         if (args.length == 0)
             return "";
         StringBuilder sb = new StringBuilder(args[0]);
@@ -169,7 +227,7 @@ public abstract class ZPUtil {
      * @param bufferLength Amount of prereserved space in the StringBuilder.
      * @return String value of args concatenated.
      */
-    public static final String concatString(int bufferLength, String... args) {
+    public static String concatString(int bufferLength, String... args) {
         StringBuilder sb = new StringBuilder(bufferLength);
         for (String s : args) {
             sb.append(s);

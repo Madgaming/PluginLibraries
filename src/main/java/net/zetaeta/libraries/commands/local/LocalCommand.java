@@ -1,6 +1,7 @@
 package net.zetaeta.libraries.commands.local;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 
 import org.bukkit.command.CommandSender;
@@ -9,21 +10,21 @@ import org.bukkit.command.CommandSender;
  * @author Zetaeta
  *
  */
-public interface LocalCommandExecutor {
+public interface LocalCommand {
 
     /**
-     * Gets the parent LocalCommandExecutor in the command tree.
+     * Gets the parent LocalCommand in the command tree.
      *
-     * @return parent LocalCommandExecutor
+     * @return parent LocalCommand
      */
-    public LocalCommandExecutor getParent();
+    public LocalCommand getParent();
 
     /**
      * Gets the registered subcommands' executors
      *
      * @return Set of LocalCommandExecutors registered as subcommands.
      */
-    public Collection<LocalCommandExecutor> getSubCommands();
+    public Collection<LocalCommand> getSubCommands();
     
     /**
      * @return aliases of all registered subcommands.
@@ -58,7 +59,14 @@ public interface LocalCommandExecutor {
      *
      * @param subCommandExecutor Subcommand to be registered.
      */
-    public void registerSubCommand(LocalCommandExecutor subCommandExecutor);
+    public LocalCommand registerSubCommand(LocalCommand subCommandExecutor);
+    
+    /**
+     * Registers a LocalCommandExecutor that uses individual methods instead of classes to execute commands.
+     * 
+     * @param commandsExecutor
+     */
+    public List<LocalCommand> registerSubCommands(LocalCommandExecutor commandsExecutor);
     
     /**
      * Executes the subcommand.
@@ -69,4 +77,11 @@ public interface LocalCommandExecutor {
      * @return Whether subcommand executed successfully.
      */
     public boolean execute(CommandSender sender, String alias, String[] args);
+    
+    /**
+     * Sends the command's usage message to the target, using the plugin's preferred means of sending it.
+     * 
+     * @param target CommandSender to send the usage message to.
+     */
+    public void sendUsage(CommandSender target);
 }

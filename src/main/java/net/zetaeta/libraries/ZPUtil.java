@@ -85,7 +85,9 @@ public abstract class ZPUtil {
                 current = new Permission(permStr);
                 current.addParent(previous, true);
                 previous = current;
-                getPluginManager().addPermission(current);
+                if (!getPluginManager().getPermissions().contains(current)) {
+                    getPluginManager().addPermission(current);
+                }
             }
         }
         return sender.hasPermission(permission);

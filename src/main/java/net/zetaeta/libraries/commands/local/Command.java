@@ -17,7 +17,7 @@ public @interface Command {
     boolean useCommandArguments() default false;
     String[] boolFlags() default {};
     String[] valueFlags() default {};
-    String permission() default "";
+    String permission();
     boolean checkPermissions() default true;
     boolean playersOnly() default false;
 }

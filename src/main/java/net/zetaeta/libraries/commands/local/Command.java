@@ -13,6 +13,7 @@ public @interface Command {
     String[] aliases();
     String value() default "";
     String[] usage();
+    String[] shortUsage();
     boolean useCommandArguments() default false;
     String[] boolFlags() default {};
     String[] valueFlags() default {};

@@ -34,9 +34,7 @@ public abstract class ZPUtil {
      * @return Whether sender has permission
      */
     public static boolean checkPermission(CommandSender sender, String permission) {
-        if(sender.hasPermission(permission)) return true;
-        sender.sendMessage("§cYou do not have access to that command!");
-        return false;
+        return checkPermission(sender, permission, true, true);
     }
     
 
@@ -53,6 +51,7 @@ public abstract class ZPUtil {
         }
         return hasPerm;
     }
+    
     
     public static boolean checkPermissionRecursive(CommandSender sender, String permission) {
         String[] nodes = permission.split("\\.");

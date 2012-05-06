@@ -4,9 +4,11 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 
 import net.zetaeta.libraries.ZPUtil;
 
@@ -21,9 +23,10 @@ import org.bukkit.command.CommandSender;
 public abstract class AbstractLocalCommandExecutor implements LocalCommand {
     protected Map<String, LocalCommand> subCommands;
     protected String[] usage;
+    protected String[] shortUsage;
     protected String[] aliases;
-    protected LocalPermission permission;
     protected LocalCommand parent;
+    protected String permission;
     
     /**
      * Creates an empty {@link AbstractLocalCommandExecutor}, only initialising the subCommands Map and aliases Set.
@@ -51,7 +54,7 @@ public abstract class AbstractLocalCommandExecutor implements LocalCommand {
      * @param usage Usage message when the command fails.
      * @param aliases Aliases of the command.
      */
-    public AbstractLocalCommandExecutor(LocalCommand parent, LocalPermission permission, String[] usage, String[] aliases) {
+    public AbstractLocalCommandExecutor(LocalCommand parent, String permission, String[] usage, String[] aliases) {
         this.usage = usage;
         this.parent = parent;
         this.permission = permission;
@@ -71,7 +74,11 @@ public abstract class AbstractLocalCommandExecutor implements LocalCommand {
      * {@inheritDoc}
      */
     public Collection<LocalCommand> getSubCommands() {
-        return subCommands.values();
+        return new HashSet<LocalCommand>(subCommands.values());
+    }
+    
+    public Collection<LocalCommand> getOrderedSubCommands() {
+        return new TreeSet<LocalCommand>(subCommands.values());
     }
     
     /**
@@ -85,7 +92,7 @@ public abstract class AbstractLocalCommandExecutor implements LocalCommand {
     /**
      * {@inheritDoc}
      */
-    public LocalPermission getPermission() {
+    public String getPermission() {
         return permission;
     }
     
@@ -97,6 +104,9 @@ public abstract class AbstractLocalCommandExecutor implements LocalCommand {
         return usage;
     }
     
+    public String[] getShortUsage() {
+        return shortUsage;
+    }
     
     /**
      * {@inheritDoc}
@@ -148,7 +158,6 @@ public abstract class AbstractLocalCommandExecutor implements LocalCommand {
      * @param args Arguments of the current command.
      * @return True if a subcommand is run, false otherwise. It is recommended for the current command to return true if this method returns true.
      */
-    @SuppressWarnings("static-access")
     public boolean trySubCommand(CommandSender sender, String alias, String[] args) {
         
         if (args.length < 1) {
@@ -159,12 +168,30 @@ public abstract class AbstractLocalCommandExecutor implements LocalCommand {
                 return true;
             }
             else {
-//                SettlementMessenger.sendUsage(sender, subCommands.get(args[0]).getUsage());
                 sendUsage(sender);
                 return true;
             }
         }
         return false;
+    }
+
+    public LocalCommand getSubCommand(String alias) {
+        String[] aliases = alias.trim().split(" ");
+        if (aliases.length == 1) {
+            return subCommands.get(alias);
+        }
+        else {
+            return subCommands.get(aliases[0]) == null ? null : subCommands.get(aliases[0]).getSubCommand(ZPUtil.removeFirstIndex(aliases));
+        }
+    }
+    
+    public LocalCommand getSubCommand(String[] aliases) {
+        if (aliases.length == 1) {
+            return subCommands.get(aliases[0]);
+        }
+        else {
+            return subCommands.get(aliases[0]) == null ? null : subCommands.get(aliases[0]).getSubCommand(ZPUtil.removeFirstIndex(aliases));
+        }
     }
 
     /**
@@ -173,4 +200,8 @@ public abstract class AbstractLocalCommandExecutor implements LocalCommand {
     public abstract boolean execute(CommandSender sender, String alias, String[] args);
     
     public abstract void sendUsage(CommandSender target);
+    
+    public String toString() {
+        return parent.toString() + " " + aliases[0];
+    }
 }

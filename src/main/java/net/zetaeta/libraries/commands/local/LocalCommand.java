@@ -27,6 +27,13 @@ public interface LocalCommand {
     public Collection<LocalCommand> getSubCommands();
     
     /**
+     * Gets the registered subcommands' executors
+     *
+     * @return Set of LocalCommandExecutors registered as subcommands.
+     */
+    public Collection<LocalCommand> getOrderedSubCommands();
+    
+    /**
      * @return aliases of all registered subcommands.
      */
     public Set<String> getSubCommandAliases();
@@ -36,7 +43,7 @@ public interface LocalCommand {
      *
      * @return LocalPermission required for this command.
      */
-    public LocalPermission getPermission();
+    public String getPermission();
 
     /**
      * Gets the usage list for the command, used for improperly formed command or {@literal /settlement help <command>}
@@ -44,6 +51,13 @@ public interface LocalCommand {
      * @return Command's usage info, in String[] form ready for {@link org.bukkit.command.CommandSender#sendMessage(String[]) sendMessage()}.
      */
     public String[] getUsage();
+    
+    /**
+     * Gets a short usage message for the command, for use in /settlement help and similar.
+     * 
+     * @return Short usage message.
+     */
+    public String[] getShortUsage();
 
     /**
      * Gets different possible aliases for the subcommand.
@@ -58,6 +72,7 @@ public interface LocalCommand {
      * for future convenience and to make extensions easier.
      *
      * @param subCommandExecutor Subcommand to be registered.
+     * @return Registered subcommand for simplicity.
      */
     public LocalCommand registerSubCommand(LocalCommand subCommandExecutor);
     
@@ -65,6 +80,7 @@ public interface LocalCommand {
      * Registers a LocalCommandExecutor that uses individual methods instead of classes to execute commands.
      * 
      * @param commandsExecutor
+     * @return {@link List} of registered commands.
      */
     public List<LocalCommand> registerSubCommands(LocalCommandExecutor commandsExecutor);
     
@@ -84,4 +100,20 @@ public interface LocalCommand {
      * @param target CommandSender to send the usage message to.
      */
     public void sendUsage(CommandSender target);
+    
+    /**
+     * Gets the LocalCommand representing the given subcommand alias.
+     *
+     * @param alias Alias of a subcommand to get the executor of.
+     * @return alias' LocalCommand, or null if no subcommand of that name exists.
+     */
+    public LocalCommand getSubCommand(String alias);
+    
+    /**
+     * Gets the LocalCommand representing the given subcommand aliases.
+     *
+     * @param aliases Alias of a subcommand to recursively get the executor of.
+     * @return aliases' LocalCommand, or null if no subcommand of that name exists.
+     */
+    public LocalCommand getSubCommand(String[] aliases);
 }

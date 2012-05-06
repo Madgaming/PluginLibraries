@@ -26,6 +26,7 @@ public class ExecutorWrapper extends AbstractLocalCommandExecutor {
         this.executorMethod = executorMethod;
         Command cmdAnnotation = executorMethod.getAnnotation(Command.class);
         usage = cmdAnnotation.usage();
+        shortUsage = cmdAnnotation.shortUsage();
         aliases = cmdAnnotation.aliases();
         if (aliases.length == 0) {
             aliases = new String[] {cmdAnnotation.value()};
@@ -36,11 +37,14 @@ public class ExecutorWrapper extends AbstractLocalCommandExecutor {
         checkPermissions = cmdAnnotation.checkPermissions();
         playersOnly = cmdAnnotation.playersOnly();
         permission = cmdAnnotation.permission();
+        Class<?>[] params = executorMethod.getParameterTypes();
+        if (!useCmdArgs && params.length == 2 && params[1] == CommandArguments.class) {
+            useCmdArgs = true;
+        }
     }
     
     @Override
     public boolean execute(CommandSender sender, String alias, String[] args) {
-        Bukkit.getLogger().info("ExecutorWrapper: execute");
         if (trySubCommand(sender, alias, args)) {
             return true;
         }
@@ -54,7 +58,7 @@ public class ExecutorWrapper extends AbstractLocalCommandExecutor {
         boolean success;
         try {
             if (useCmdArgs) {
-                success = (Boolean) executorMethod.invoke(executor, sender, CommandArguments.processArguments(args, boolFlags, valueFlags));
+                success = (Boolean) executorMethod.invoke(executor, sender, CommandArguments.processArguments(alias, args, boolFlags, valueFlags));
             }
             else {
                 success = (Boolean) executorMethod.invoke(executor, sender, alias, args);
@@ -79,9 +83,5 @@ public class ExecutorWrapper extends AbstractLocalCommandExecutor {
     @Override
     public void sendUsage(CommandSender target) {
         target.sendMessage(usage);
-    }
-    
-    public LocalPermission createPermission(String valueString) {
-        return null;
     }
 }

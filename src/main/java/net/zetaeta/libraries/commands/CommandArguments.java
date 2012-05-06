@@ -21,20 +21,20 @@ import org.bukkit.command.CommandSender;
  *
  */
 public class CommandArguments {
-    public static Logger log = Bukkit.getLogger();
     
-    private String[] args;
+    private String[] rawArgs;
     private boolean processed;
     private Set<String> booleanFlags;
     private Map<String, String> valueFlagMap;
     private List<String> nonProcessedArguments;
+    
     /**
      * Constructs a CommanArguments with the specified String array as arguments.
      * 
      * @param arguments String[] to process.
      */
     public CommandArguments(String[] arguments) {
-        args = arguments;
+        rawArgs = arguments;
         booleanFlags = new HashSet<String>();
         valueFlagMap = new HashMap<String, String>();
         nonProcessedArguments = new ArrayList<String>();
@@ -42,7 +42,7 @@ public class CommandArguments {
     
     /**
      * Constructs a CommandArgumentsTest with the parameter String split by spaces.
-     * Equivalent to {@link #CommandArgumentsTest(String[]) CommandArgumentsTest(arguments.split(" ")}.
+     * Equivalent to {@link #CommandArguments(String[]) CommandArgumentsTest(arguments.split(" ")}.
      * 
      * @param arguments String to split and process.
      */
@@ -52,7 +52,7 @@ public class CommandArguments {
     
     /**
      * Constructs a CommandArgumentsTest with the parameter String split by the parameter split String.
-     * Equivalent to {@link #CommandArgumentsTest(String[]) CommandArgumentsTest(arguments.split(split)}.
+     * Equivalent to {@link #CommandArguments(String[]) CommandArgumentsTest(arguments.split(split)}.
      * 
      * @param arguments String to split and process.
      * @param split Regex to split arguments by.
@@ -61,10 +61,7 @@ public class CommandArguments {
         this(arguments.split(split));
     }
     
-    public static CommandArguments processArguments(String[] args, String[] boolFlags, String[] valueFlags) {
-        log.info(ZPUtil.arrayAsString(args));
-        log.info(ZPUtil.arrayAsString(boolFlags));
-        log.info(ZPUtil.arrayAsString(valueFlags));
+    public static CommandArguments processArguments(String alias, String[] args, String[] boolFlags, String[] valueFlags) {
         CommandArguments cArgs = new CommandArguments(args);
         if (cArgs.process(Arrays.asList(boolFlags), Arrays.asList(valueFlags))) {
             return cArgs;
@@ -72,8 +69,8 @@ public class CommandArguments {
         return null;
     }
     
-    public static CommandArguments processArguments(String[] args, String[] boolFlags, String[] valueFlags, CommandSender errorReciever) {
-        CommandArguments cArgs = processArguments(args, boolFlags, valueFlags);
+    public static CommandArguments processArguments(String alias, String[] args, String[] boolFlags, String[] valueFlags, CommandSender errorReciever) {
+        CommandArguments cArgs = processArguments(alias, args, boolFlags, valueFlags);
         if (cArgs == null) {
             errorReciever.sendMessage("§cYour command " + ZPUtil.arrayAsString(args) + " could not be processed.");
         }
@@ -89,88 +86,80 @@ public class CommandArguments {
      */
     public boolean process(Collection<String> boolFlags, Collection<String> valueFlags) {
         int lastprocessed = -1;
-        for (int i=0; i<args.length; ++i) {
+        for (int i=0; i<rawArgs.length; ++i) {
             if (i <= lastprocessed) {
                 continue;
             }
-            if (args[i].startsWith("-")) {
-                if (boolFlags.contains(args[i].substring(1))) {
-                    booleanFlags.add(args[i].substring(1));
-                    log.info("Adding boolFlag: " + args[i]);
+            if (rawArgs[i].startsWith("-")) {
+                if (boolFlags.contains(rawArgs[i].substring(1))) {
+                    booleanFlags.add(rawArgs[i].substring(1));
                 }
-                else if (valueFlags.contains(args[i].substring(1))) {
+                else if (valueFlags.contains(rawArgs[i].substring(1))) {
                     
-                    if (args.length == i + 1) {
+                    if (rawArgs.length == i + 1) {
                         return true;
                     }
-                    if (args[i + 1].startsWith("\"")) {
-                        if (args[i + 1].endsWith("\"")) {
-                            valueFlagMap.put(args[i], args[i + 1].substring(1, args[i + 1].length() - 1));
-                            log.info("Adding value flag: " + args[i] + " = " + args[i + 1].substring(1, args[i + 1].length() - 1));
+                    if (rawArgs[i + 1].startsWith("\"")) {
+                        if (rawArgs[i + 1].endsWith("\"")) {
+                            valueFlagMap.put(rawArgs[i], rawArgs[i + 1].substring(1, rawArgs[i + 1].length() - 1));
                             lastprocessed = i + 1;
                             continue;
                         }
-                        if (args.length <= i + 2) {
+                        if (rawArgs.length <= i + 2) {
                             continue;
                         }
-                        StringBuilder value = new StringBuilder((args.length - i) * 10);
-                        value.append(args[i + 1].substring(1));
-                        for (int j=i + 2; j<args.length; j++) {
-                            if (args[j].endsWith("\"")) {
-                                log.info("Closing String: \"" + args[j] + "\"");
-                                value.append(' ').append(args[j].substring(0, args[j].length() - 1));
+                        StringBuilder value = new StringBuilder((rawArgs.length - i) * 10);
+                        value.append(rawArgs[i + 1].substring(1));
+                        for (int j=i + 2; j<rawArgs.length; j++) {
+                            if (rawArgs[j].endsWith("\"")) {
+                                value.append(' ').append(rawArgs[j].substring(0, rawArgs[j].length() - 1));
                                 lastprocessed = j;
                                 break;
                             }
-                            value.append(' ').append(args[j]);
+                            value.append(' ').append(rawArgs[j]);
                             lastprocessed = j;
-                            if (j == args.length - 1) { // if this is the last index
+                            if (j == rawArgs.length - 1) { // if this is the last index
                                 return false;
                             }
                         }
-                        valueFlagMap.put(args[i].substring(1), value.toString());
-                        log.info("Adding value flag: " + args[i] + " = " + value.toString());
+                        valueFlagMap.put(rawArgs[i].substring(1), value.toString());
                     }
-                    else if (args[i + 1].startsWith("'")) {
-                        if (args[i + 1].endsWith("'")) {
-                            valueFlagMap.put(args[i].substring(1), args[i + 1].substring(1, args[i + 1].length() - 1));
-                            log.info("Adding value flag: " + args[i] + " = " + args[i + 1].substring(1, args[i + 1].length() - 1));
+                    else if (rawArgs[i + 1].startsWith("'")) {
+                        if (rawArgs[i + 1].endsWith("'")) {
+                            valueFlagMap.put(rawArgs[i].substring(1), rawArgs[i + 1].substring(1, rawArgs[i + 1].length() - 1));
                             lastprocessed = i + 1;
                             continue;
                         }
-                        if (args.length <= i + 2) {
+                        if (rawArgs.length <= i + 2) {
                             continue;
                         }
-                        StringBuilder value = new StringBuilder(args.length - i * 10);
-                        value.append(args[i + 1]);
-                        for (int j=i + 2; j<args.length; j++) {
-                            if (args[j].endsWith("'")) {
-                                value.append(args[j].substring(0, args[j].length()));
+                        StringBuilder value = new StringBuilder(rawArgs.length - i * 10);
+                        value.append(rawArgs[i + 1]);
+                        for (int j=i + 2; j<rawArgs.length; j++) {
+                            if (rawArgs[j].endsWith("'")) {
+                                value.append(rawArgs[j].substring(0, rawArgs[j].length()));
                                 lastprocessed = j;
                                 break;
                             }
-                            value.append(' ').append(args[j]);
+                            value.append(' ').append(rawArgs[j]);
                             lastprocessed = j;
-                            if (j == args.length - 1) { // if this is the last index
+                            if (j == rawArgs.length - 1) { // if this is the last index
                                 return false;
                             }
                         }
-                        valueFlagMap.put(args[i].substring(1), value.toString());
-                        log.info("Adding value flag: " + args[i] + " = " + value.toString());
+                        valueFlagMap.put(rawArgs[i].substring(1), value.toString());
                     }
                     else {
-//                        if (hasMoreFlags(Arrays.copyOfRange(args, i, args.length))) {
-//                            valueFlagMap.put(args[i], ZPUtil.arrayAsString(Arrays.copyOfRange(args, i, args.length)));
+//                        if (hasMoreFlags(Arrays.copyOfRange(rawArgs, i, rawArgs.length))) {
+//                            valueFlagMap.put(rawArgs[i], ZPUtil.arrayAsString(Arrays.copyOfRange(rawArgs, i, rawArgs.length)));
 //                        }
-                        valueFlagMap.put(args[i].substring(1), args[i + 1]);
-                        log.info("Adding value flag: " + args[i] + " = " + args[i + 1]);
+                        valueFlagMap.put(rawArgs[i].substring(1), rawArgs[i + 1]);
                         lastprocessed = i + 1;
                     }
                 }
             }
             else {
-                nonProcessedArguments.add(args[i]);
-                log.info("Added non-processed argument: " + args[i]);
+                nonProcessedArguments.add(rawArgs[i]);
             }
         }
         processed = true;
@@ -213,6 +202,10 @@ public class CommandArguments {
     
     public String[] getUnprocessedArgArray() {
         return nonProcessedArguments.toArray(new String[nonProcessedArguments.size()]);
+    }
+    
+    public String[] getRawArgs() {
+        return rawArgs;
     }
     
     @Deprecated

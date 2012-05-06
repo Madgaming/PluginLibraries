@@ -12,6 +12,7 @@ import org.bukkit.plugin.java.JavaPlugin;
  * Not particularly useful now, may add more stuff in future.
  *
  */
+@Useless
 public abstract class ManagedJavaPlugin extends JavaPlugin {
     
     /**

@@ -212,7 +212,7 @@ public abstract class ZPUtil {
     public static String concatString(String... args) {
         if (args.length == 0)
             return "";
-        StringBuilder sb = new StringBuilder(args[0]);
+        StringBuilder sb = new StringBuilder(args.length * 8);
         for (String s : args) {
             sb.append(s);
         }

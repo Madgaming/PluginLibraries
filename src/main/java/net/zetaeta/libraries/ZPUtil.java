@@ -9,7 +9,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.logging.Logger;
 
+import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -22,7 +24,7 @@ import org.bukkit.plugin.java.JavaPlugin;
  * @author Zetaeta
  *
  */
-public abstract class ZPUtil {
+public class ZPUtil {
     
     protected ZPUtil() { }
     
@@ -65,7 +67,7 @@ public abstract class ZPUtil {
         String permIt = permission;
         List<String> toRegister = new ArrayList<String>(nodes.length);
         toRegister.add(permission);
-        for (int i=nodes.length - 1, length = permission.length(); i > 0 && !sender.isPermissionSet(permIt); --i) {
+        for (int i=nodes.length - 1, length = permission.length(); i > 0 && getPluginManager().getPermission(permIt) == null; --i) {
             nodesIt.delete(length - nodes[i].length(), length);
             length -= nodes[i].length();
             if (nodesIt.charAt(nodesIt.length() - 1) == '.') {

@@ -9,7 +9,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 
-import net.zetaeta.libraries.ZPUtil;
+import net.zetaeta.bukkit.util.Util;
 
 import org.bukkit.command.CommandSender;
 import org.junit.Test;
@@ -68,9 +68,9 @@ private static Logger log = Logger.getLogger("CommandArguments");
 //    }
     
     public static CommandArgumentsTest processArguments(String[] args, String[] boolFlags, String[] valueFlags) {
-        log.info(ZPUtil.arrayAsString(args));
-        log.info(ZPUtil.arrayAsString(boolFlags));
-        log.info(ZPUtil.arrayAsString(valueFlags));
+        log.info(Util.arrayAsString(args));
+        log.info(Util.arrayAsString(boolFlags));
+        log.info(Util.arrayAsString(valueFlags));
         CommandArgumentsTest cArgs = new CommandArgumentsTest(args);
         if (cArgs.process(Arrays.asList(boolFlags), Arrays.asList(valueFlags))) {
             return cArgs;
@@ -81,7 +81,7 @@ private static Logger log = Logger.getLogger("CommandArguments");
     public static CommandArgumentsTest processArguments(String[] args, String[] boolFlags, String[] valueFlags, CommandSender errorReciever) {
         CommandArgumentsTest cArgs = processArguments(args, boolFlags, valueFlags);
         if (cArgs == null) {
-            errorReciever.sendMessage("§cYour command " + ZPUtil.arrayAsString(args) + " could not be processed.");
+            errorReciever.sendMessage("§cYour command " + Util.arrayAsString(args) + " could not be processed.");
         }
         return cArgs;
     }
@@ -166,7 +166,7 @@ private static Logger log = Logger.getLogger("CommandArguments");
                     }
                     else {
 //                        if (hasMoreFlags(Arrays.copyOfRange(args, i, args.length))) {
-//                            valueFlagMap.put(args[i], ZPUtil.arrayAsString(Arrays.copyOfRange(args, i, args.length)));
+//                            valueFlagMap.put(args[i], Util.arrayAsString(Arrays.copyOfRange(args, i, args.length)));
 //                        }
                         valueFlagMap.put(args[i].substring(1), args[i + 1]);
                         log.info("Adding value flag: " + args[i] + " = " + args[i + 1]);

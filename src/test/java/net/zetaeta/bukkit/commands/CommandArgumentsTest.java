@@ -1,4 +1,4 @@
-package net.zetaeta.libraries.commands;
+package net.zetaeta.bukkit.commands;
 
 import java.util.Arrays;
 import java.util.Collection;

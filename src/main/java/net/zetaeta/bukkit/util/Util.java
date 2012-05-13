@@ -5,6 +5,7 @@ import static org.bukkit.Bukkit.getPluginManager;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -53,6 +54,19 @@ public class Util {
         return Arrays.copyOfRange(array, 1, array.length);
     }
     
+    @SuppressWarnings("unchecked")
+    public static <T> T[] reverse(T[] array) {
+        System.out.println(Arrays.toString(array));
+        T[] newArray = (T[]) Array.newInstance(array.getClass().getComponentType(), array.length);
+        System.out.println(Arrays.toString(newArray));
+        int len = array.length - 1;
+        for (int i=0; i<array.length; ++i) {
+            newArray[i] = array[len-i];
+        }
+        System.out.println(Arrays.toString(newArray));
+        return newArray;
+    }
+    
     public static boolean booleanValue(int i) {
         return i == 0 ? false : true;
     }
@@ -67,5 +81,13 @@ public class Util {
     
     public static boolean booleanValue(byte b) {
         return b == 0 ? false : true;
+    }
+    
+    public static void notNull(String message, Object... objects) {
+        for (Object object : objects) {
+            if (object == null) {
+                throw new IllegalArgumentException(message);
+            }
+        }
     }
 }

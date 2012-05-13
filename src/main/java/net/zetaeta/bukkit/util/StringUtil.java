@@ -1,13 +1,16 @@
 package net.zetaeta.bukkit.util;
 
 public class StringUtil {
+    
+    public static final String lineSeparator = System.lineSeparator();
+    
     /**
      * Concatenates an array of Strings into a single String by putting spaces between them
      * 
      * @param array Array of Strings to be concatenated
      * @return Single String representing the array
      */
-    public static String arrayAsString(String[] array) {
+    public static String arrayAsString(String... array) {
         if (array.length == 0) {
             return "";
         }
@@ -26,7 +29,7 @@ public class StringUtil {
      * @param array Array of Strings to be concatenated
      * @return Single String representing the array
      */
-    public static String arrayAsCommaString(String[] array) {
+    public static String arrayAsCommaString(String... array) {
         if (array.length == 0) {
             return "";
         }
@@ -38,6 +41,27 @@ public class StringUtil {
         return sb.toString();
     }
     
+    public static String arrayAsMultilineString(boolean endLineSep, String... array) {
+        if (array.length == 0) {
+            if (endLineSep) {
+                return System.getProperty("line.separator");
+            }
+            return "";
+        }
+        String lineSep = System.getProperty("line.separator");
+        StringBuilder sb = new StringBuilder(array[0]);
+        for (int i=0; i<array.length - 1; ++i) {
+            sb.append(array[i]).append(lineSep);
+        }
+        if (endLineSep) {
+            sb.append(lineSep);
+        }
+        return sb.toString();
+    }
+    
+    public static String[] stringAsLineArray(String string) {
+        return string.split("\r?\n");
+    }
     
     /**
      * Concatenates multiple objects into a String using StringBuilder and String.valueOf(Object)
@@ -101,5 +125,29 @@ public class StringUtil {
             sb.append(s);
         }
         return sb.toString();
+    }
+    
+    public static String padString(String string, char padder, int size, boolean atEnd) {
+        if (string.length() >= size) {
+            return string.substring(0, size);
+        }
+        int charCount = size - string.length();
+        StringBuilder sb = new StringBuilder(size);
+        if (!atEnd) {
+            for (int i=0; i<charCount; ++i) {
+                sb.append(padder);
+            }
+        }
+        sb.append(string);
+        if (atEnd) {
+            for (int i=0; i<charCount; ++i) {
+                sb.append(padder);
+            }
+        }
+        return sb.toString();
+    }
+    
+    public static String padString(String string, int size) {
+        return padString(string, ' ', size, true);
     }
 }

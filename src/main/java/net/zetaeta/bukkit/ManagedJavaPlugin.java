@@ -26,7 +26,6 @@ import org.bukkit.plugin.java.JavaPlugin;
 public abstract class ManagedJavaPlugin extends JavaPlugin {
     private File configFile;
     private PluginConfiguration config;
-    private Logger log;
     
     /**
      * Represents the CommandsManager for this plugin.
@@ -43,13 +42,9 @@ public abstract class ManagedJavaPlugin extends JavaPlugin {
     
     @Override
     public PluginConfiguration getConfig() {
-        log = getLogger();
-        log.info("getConfig");
         if (config == null) {
-            log.info("CONFIG == NULL");
             reloadConfig();
         }
-        log.info("getConfig: keys: " + config.getKeys(true));
         return config;
     }
     
@@ -58,7 +53,6 @@ public abstract class ManagedJavaPlugin extends JavaPlugin {
         if (configFile == null) {
             configFile = new File(getDataFolder(), "config.yml");
         }
-        log.info("reloadConfig");
         getDataFolder().mkdirs();
         try {
             configFile.createNewFile();
@@ -66,11 +60,7 @@ public abstract class ManagedJavaPlugin extends JavaPlugin {
             getLogger().log(Level.SEVERE, "Could not create config file!", e);
             e.printStackTrace();
         }
-        System.out.println("Created files!");
-        System.out.println("File length = " + configFile.length());
-        System.out.println("File location = " + configFile.getAbsolutePath());
         if (configFile.length() == 0 && getResource("config.yml") != null) {
-            System.out.println("Copying defaults!");
             try {
                 FileUtil.copyStreams(getResource("config.yml"), new FileOutputStream(configFile));
             } catch (FileNotFoundException e) {
@@ -81,9 +71,7 @@ public abstract class ManagedJavaPlugin extends JavaPlugin {
         config = PluginConfiguration.loadConfiguration(configFile);
         InputStream defaults = getResource("config.yml");
         if (defaults != null) {
-            log.info("########IGNORE BELOW########");
             config.setDefaults(PluginConfiguration.loadConfiguration(defaults));
-            log.info("########IGNORE ABOVE########");
         }
     }
     

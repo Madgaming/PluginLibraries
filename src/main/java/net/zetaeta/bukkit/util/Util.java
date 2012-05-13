@@ -1,23 +1,7 @@
 package net.zetaeta.bukkit.util;
 
-import static org.bukkit.Bukkit.getPluginManager;
-
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
 import java.lang.reflect.Array;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
-import java.util.ListIterator;
-import java.util.logging.Logger;
-
-import org.bukkit.Bukkit;
-import org.bukkit.command.CommandSender;
-import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.permissions.Permission;
-import org.bukkit.plugin.java.JavaPlugin;
 
 /**
  * Provides utility methods for my plugins.
@@ -56,14 +40,11 @@ public class Util {
     
     @SuppressWarnings("unchecked")
     public static <T> T[] reverse(T[] array) {
-        System.out.println(Arrays.toString(array));
         T[] newArray = (T[]) Array.newInstance(array.getClass().getComponentType(), array.length);
-        System.out.println(Arrays.toString(newArray));
         int len = array.length - 1;
         for (int i=0; i<array.length; ++i) {
             newArray[i] = array[len-i];
         }
-        System.out.println(Arrays.toString(newArray));
         return newArray;
     }
     
